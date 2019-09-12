@@ -27,13 +27,13 @@ class Word2VecModel():
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_modelfile, binary=True, encoding='latin-1'
             )
-            self.dimension = self.Word2Vec_model.vector_size
+            self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model in ['Google', 'random']:
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 google_modelfile, binary=True
             )
-            self.dimension = self.Word2Vec_model.vector_size
+            self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 12  # 90 percentile value of number of words in a tweet based on Google
 
     def clean(self, sentence):
@@ -89,7 +89,7 @@ class Word2VecModel():
             for word in words_seq:
                 if index < self.tweet_length:
                     try:
-                        values[i, index, :] = self.Word2Vec_model[word]
+                        values[i, index, :] = self.word2Vec_model[word]
                         index += 1
                     except KeyError:
                         pass
@@ -98,8 +98,8 @@ class Word2VecModel():
         return values
 
     def random_vectorize(self, tweet_base):
-        max_val = np.amax(self.Word2Vec_model.syn0)
-        min_val = np.amin(self.Word2Vec_model.syn0)
+        max_val = np.amax(self.word2Vec_model.syn0)
+        min_val = np.amin(self.word2Vec_model.syn0)
 
         values = np.zeros(
             (len(tweet_base), self.tweet_length, self.dimension),
@@ -114,7 +114,7 @@ class Word2VecModel():
         return values
 
     def save(self, train_vectors, train_labels, test_vectors, test_labels):
-        filename = '1_Word2Vec_' + self.word2vec_type +\
+        filename = 'Models/1_Word2Vec_' + self.word2vec_type +\
                     '_' + self.classdataset + '.pickle'
         with open(filename, 'wb') as f:
             pickle.dump(
