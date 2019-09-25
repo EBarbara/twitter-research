@@ -1,17 +1,17 @@
-from vectorizer import Word2VecModel
+from vectorizer import GloveModel
 
 import deep_learning
 from deep_learning import ConvolutedNeuralNetwork
 
 if __name__ == '__main__':
-    word2vec = Word2VecModel(
+    glove = GloveModel(
         train_dataset='Data Collection/1_TrainingSet_3Class.csv',
         test_dataset='Data Collection/1_TestSet_3Class.csv',
         class_qtd='3class',
-        base_model='Twitter'
+        dimensions=200
     )
-    train_vectors, train_labels, test_vectors, test_labels = word2vec.vectorize()
-    word2vec.save(train_vectors, train_labels, test_vectors, test_labels)
+    train_vectors, train_labels, test_vectors, test_labels = glove.vectorize()
+    glove.save(train_vectors, train_labels, test_vectors, test_labels)
 
     cnn = ConvolutedNeuralNetwork(
         train_vectors=train_vectors,

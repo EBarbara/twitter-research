@@ -16,7 +16,7 @@ from sklearn.metrics import classification_report
 start_time = time.clock()
 
 # parse data
-filename = '../LSTM-CNN code/1_Word2Vec_Google_2class.pickle'
+filename = 'Models/1_Word2Vec_Google_2class.pickle'
 with open(filename, mode='rb') as f:
     Train_X, Test_X, Train_Y, Test_Y_ori = pickle.load(f, encoding='latin1')  # Also can use the encoding 'iso-8859-1'
 
@@ -41,7 +41,7 @@ model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['ac
 
 # ====================================================================================================
 # Training, check point and save the best model
-filepath = "weights.best2.hdf5"
+filepath = "Models/weights.best2.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 callbacks_list = [checkpoint]
 hist = model.fit(Train_X, Train_Y, epochs=20, batch_size=64, shuffle=False,
@@ -57,7 +57,7 @@ print('\n')
 
 # =============================================================================================================
 # load weights, predict based on the best model, compute accuracy, precision, recall, f-score, confusion matrix.
-model.load_weights("weights.best2.hdf5")
+model.load_weights("Models/weights.best2.hdf5")
 # Compile model (required to make predictions)
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 # Computer confusion matrix, precision, recall.

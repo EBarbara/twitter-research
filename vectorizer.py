@@ -9,6 +9,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 twitter_modelfile = 'Models/word2vec_twitter_model.bin'
 google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
 
+glove_embeddings = {
+    25: 'Models/glove.twitter.27B.25d.txt',
+    50: 'Models/glove.twitter.27B.50d.txt',
+    100: 'Models/glove.twitter.27B.100d.txt',
+    200: 'Models/glove.twitter.27B.200d.txt'
+}
+
 # Cleaning process to remove any punctuation, parentheses, question marks.
 # This leaves only alphanumeric characters.
 remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
@@ -121,3 +128,52 @@ class Word2VecModel():
                 [train_vectors, test_vectors, train_labels, test_labels],
                 f
             )
+
+
+class Glove():
+    def __init__(self, train_dataset, test_dataset, class_qtd, dimensions):
+        self.classdataset = class_qtd
+        self.embedding_file = glove_embeddings[dimensions]
+        self.dimension = dimensions
+
+        self.train_tweets = self.parse_tweets(train_dataset)
+        self.test_tweets = self.parse_tweets(test_dataset)
+        self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+
+    def clean(self, sentence):
+        return re.sub(remove_special_chars, "", sentence.lower())
+
+    def parse_tweets(self, filename):
+        with open(filename, 'r', encoding='utf-8', newline='') as f:
+            reader = csv.reader(f)
+            tweets = []
+            for tweet in reader:
+                tweet[2] = self.clean(tweet[2])
+                tweets.append(tweet)
+        return tweets
+
+    def vectorize(self):
+        train_labels = [int(tweet[0]) for tweet in self.train_tweets]
+        test_labels = [int(tweet[0]) for tweet in self.test_tweets]
+
+        vectorizer = CountVectorizer(
+            min_df=1,
+            stop_words='english',
+            ngram_range=(1, 1),
+            analyzer=u'word'
+        )
+        analyzer = vectorizer.build_analyzer()
+        train_vectors = self.model_vectorize(
+            tweet_base=self.train_tweets,
+            analyzer=analyzer
+        )
+
+        test_vectors = self.model_vectorize(
+            tweet_base=self.test_tweets,
+            analyzer=analyzer
+        )
+
+        print(f'{self.dimension} dimensions glove matrix has been created as'
+              ' the input layer')
+
+        return train_vectors, train_labels, test_vectors, test_labels

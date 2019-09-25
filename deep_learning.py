@@ -42,7 +42,7 @@ def train_network(
     index = np.argmax(hist.history['val_acc'])
     print(f"The optimal epoch size: {hist.epoch[index]}, The value of high accuracy {np.max(hist.history['val_acc'])}")
     print('\n')
-    print(f"Computation Time {time.clock() - self.start_time} seconds")
+    print(f"Computation Time {time.clock() - network.start_time} seconds")
     print('\n')
 
     # Save the history accuracy results.
@@ -124,13 +124,14 @@ class ConvolutedNeuralNetwork():
         self.model.add(
             keras.layers.Dense(self.qtd_classes, activation='softmax')
         )
-        optimizer = keras.optimizers.Adam(
-            lr=0.001,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-08,
-            decay=0.0
-        )
+        # optimizer = keras.optimizers.Adam(
+        #    lr=0.001,
+        #    beta_1=0.9,
+        #    beta_2=0.999,
+        #    epsilon=1e-08,
+        #    decay=0.0
+        #)
+        optimizer = keras.optimizers.SGD()
         self.model.compile(
             optimizer=optimizer,
             loss='categorical_crossentropy',
