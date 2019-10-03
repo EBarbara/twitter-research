@@ -124,14 +124,14 @@ class ConvolutedNeuralNetwork():
         self.model.add(
             keras.layers.Dense(self.qtd_classes, activation='softmax')
         )
-        # optimizer = keras.optimizers.Adam(
-        #    lr=0.001,
-        #    beta_1=0.9,
-        #    beta_2=0.999,
-        #    epsilon=1e-08,
-        #    decay=0.0
-        #)
-        optimizer = keras.optimizers.SGD()
+        optimizer = keras.optimizers.Adam(
+            lr=0.001,
+            beta_1=0.9,
+            beta_2=0.999,
+            epsilon=1e-08,
+            decay=0.0
+        )
+        # optimizer = keras.optimizers.SGD()
         self.model.compile(
             optimizer=optimizer,
             loss='categorical_crossentropy',

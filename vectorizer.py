@@ -3,6 +3,8 @@ import pickle
 import re
 
 from gensim.models.keyedvectors import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
+from gensim.test.utils import datapath, get_tmpfile
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -15,6 +17,14 @@ glove_embeddings = {
     100: 'Models/glove.twitter.27B.100d.txt',
     200: 'Models/glove.twitter.27B.200d.txt'
 }
+
+glove_parsings = {
+    25: 'Models/glove2vec.twitter.27B.25d.txt',
+    50: 'Models/glove2vec.twitter.27B.50d.txt',
+    100: 'Models/glove2vec.twitter.27B.100d.txt',
+    200: 'Models/glove2vec.twitter.27B.200d.txt'
+}
+
 
 # Cleaning process to remove any punctuation, parentheses, question marks.
 # This leaves only alphanumeric characters.
@@ -42,6 +52,7 @@ class Word2VecModel():
             )
             self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 12  # 90 percentile value of number of words in a tweet based on Google
+        print(f'The model has {self.dimension} dimensions')
 
     def clean(self, sentence):
         return re.sub(remove_special_chars, "", sentence.lower())
@@ -130,11 +141,30 @@ class Word2VecModel():
             )
 
 
-class Glove():
-    def __init__(self, train_dataset, test_dataset, class_qtd, dimensions):
+class GloveModel():
+
+    def __init__(
+        self,
+        train_dataset,
+        test_dataset,
+        class_qtd,
+        dimensions,
+        translate=False
+    ):
+        # Necessário apenas se o modelo GloVe
+        # não estiver "traduzido" para Word2Vec
+        if translate:
+            glove_embedding = glove_embeddings[dimensions]
+            glove_parsing = glove_parsings[dimensions]
+            _ = glove2word2vec(glove_embedding, glove_parsing)
+
         self.classdataset = class_qtd
-        self.embedding_file = glove_embeddings[dimensions]
-        self.dimension = dimensions
+        glove_file = glove_parsings[dimensions]
+        self.gloVe_model = KeyedVectors.load_word2vec_format(
+            glove_file,
+            encoding='utf-8'
+        )
+        self.dimension = self.gloVe_model.vector_size
 
         self.train_tweets = self.parse_tweets(train_dataset)
         self.test_tweets = self.parse_tweets(test_dataset)
@@ -157,17 +187,16 @@ class Glove():
         test_labels = [int(tweet[0]) for tweet in self.test_tweets]
 
         vectorizer = CountVectorizer(
-            min_df=1,
-            stop_words='english',
+            min_df=1, stop_words='english',
             ngram_range=(1, 1),
             analyzer=u'word'
         )
+
         analyzer = vectorizer.build_analyzer()
         train_vectors = self.model_vectorize(
             tweet_base=self.train_tweets,
             analyzer=analyzer
         )
-
         test_vectors = self.model_vectorize(
             tweet_base=self.test_tweets,
             analyzer=analyzer
@@ -177,3 +206,36 @@ class Glove():
               ' the input layer')
 
         return train_vectors, train_labels, test_vectors, test_labels
+
+    def model_vectorize(self, tweet_base, analyzer):
+        values = np.zeros(
+            (len(tweet_base), self.tweet_length, self.dimension),
+            dtype=np.float32
+        )
+
+        for i in range(len(tweet_base)):
+            words_seq = analyzer(tweet_base[i][2])
+            index = 0
+            for word in words_seq:
+                if index < self.tweet_length:
+                    try:
+                        values[i, index, :] = self.gloVe_model[word]
+                        index += 1
+                    except KeyError:
+                        pass
+                else:
+                    break
+        return values
+
+    def save(self, train_vectors, train_labels, test_vectors, test_labels):
+        filename = f'Models/1_GloVe_{self.dimension}_{self.classdataset}.pickle'
+        with open(filename, 'wb') as f:
+            pickle.dump(
+                [train_vectors, test_vectors, train_labels, test_labels],
+                f
+            )
+
+    def load(self, filepath):
+        with open(filepath, 'rb') as f:
+            data = pickle.load(f)
+        return data
