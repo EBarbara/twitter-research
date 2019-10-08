@@ -25,6 +25,7 @@ def parse_tweets(filename):
 
 trainset = 'Data Collection/1_TrainingSet_3Class.csv'
 testset = 'Data Collection/1_TrainingSet_3Class.csv'
+components = 50
 
 if __name__ == "__main__":
     print('Parsing tweets')
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     corpus = Corpus()
     corpus.fit(tokens, window=10)
 
-    glove = Glove(no_components=400, learning_rate=0.05)
+    glove = Glove(no_components=components, learning_rate=0.05)
  
     glove.fit(corpus.matrix, epochs=30, no_threads=4, verbose=True)
     glove.add_dictionary(corpus.dictionary)
@@ -49,13 +50,11 @@ if __name__ == "__main__":
     # something else besides network training, i'm screwed
     print('Saving model')
     index = len(glove.word_vectors)
-    with open('Models/Generated/GloVe_400.txt', 'w') as f:
+    with open(f'Models/Generated/GloVe_{components}.txt', 'w') as f:
         for i in range(index):
             word = glove.inverse_dictionary[i]
             vector = glove.word_vectors[i]
-            if len(vector) == 400:
+            if len(vector) == components:
                 f.write(f"{word} {' '.join(map(str, vector))}\n")
             else:
                 print(f'Word {word} misvectored')
-    
-    #glove.save('Models/Generated/glove.pickle')
