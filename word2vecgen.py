@@ -26,6 +26,7 @@ def parse_tweets(filename):
 
 trainset = 'Data Collection/1_TrainingSet_3Class.csv'
 testset = 'Data Collection/1_TrainingSet_3Class.csv'
+components = 100
 
 if __name__ == "__main__":
     print('Parsing tweets')
@@ -38,11 +39,11 @@ if __name__ == "__main__":
         tokens.append(temp)
 
     print('Generating W2V - cbow model')
-    cbow_model = Word2Vec(tokens, min_count=1, size=400)
+    cbow_model = Word2Vec(tokens, min_count=1, size=components)
     print('Saving model')
-    cbow_model.wv.save_word2vec_format('Models/Generated/W2V_cbow_400.txt')
+    cbow_model.wv.save_word2vec_format(f'Models/Generated/W2V_cbow_{components}.txt')
 
     print('Generating W2V - skipgram model')
-    skipgram_model = Word2Vec(tokens, min_count=1, sg=1, size=400)
+    skipgram_model = Word2Vec(tokens, min_count=1, sg=1, size=components)
     print('Saving model')
-    skipgram_model.wv.save_word2vec_format('Models/Generated/W2V_skipgram_400.txt')
+    skipgram_model.wv.save_word2vec_format(f'Models/Generated/W2V_skipgram_{components}.txt')
