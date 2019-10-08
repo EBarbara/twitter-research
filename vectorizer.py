@@ -4,14 +4,25 @@ import re
 
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
-from gensim.test.utils import datapath, get_tmpfile
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
 twitter_modelfile = 'Models/word2vec_twitter_model.bin'
 google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
-twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
-twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
+
+twitter_cbow_gen = {
+    50: 'Models/Generated/W2V_cbow_50.txt',
+    100: 'Models/Generated/W2V_cbow_100.txt',
+    200: 'Models/Generated/W2V_cbow_200.txt',
+    400: 'Models/Generated/W2V_cbow_400.txt',
+}
+
+twitter_skipgram_gen = {
+    50: 'Models/Generated/W2V_skipgram_50.txt',
+    100: 'Models/Generated/W2V_skipgram_100.txt',
+    200: 'Models/Generated/W2V_skipgram_200.txt',
+    400: 'Models/Generated/W2V_skipgram_400.txt',
+}
 
 glove_embeddings = {
     25: 'Models/glove.twitter.27B.25d.txt',
@@ -37,7 +48,7 @@ remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
 
 class Word2VecModel():
 
-    def __init__(self, train_dataset, test_dataset, class_qtd, base_model):
+    def __init__(self, train_dataset, test_dataset, class_qtd, base_model, set_dimensions=None):
         self.classdataset = class_qtd
         self.word2vec_type = base_model
 
@@ -45,19 +56,25 @@ class Word2VecModel():
         self.test_tweets = self.parse_tweets(test_dataset)
 
         if base_model == 'CBOWGen':
-            self.word2Vec_model = KeyedVectors.load_word2vec_format(
-                twitter_cbow_gen,
-                encoding='utf-8'
-            )
-            self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            if set_dimensions:
+                self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                    twitter_cbow_gen[set_dimensions],
+                    encoding='utf-8'
+                )
+                self.dimension = self.word2Vec_model.vector_size
+                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            else:
+                raise ValueError
         elif base_model == 'SkipGramGen':
-            self.word2Vec_model = KeyedVectors.load_word2vec_format(
-                twitter_skipgram_gen,
-                encoding='utf-8'
-            )
-            self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            if set_dimensions:
+                self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                    twitter_skipgram_gen[set_dimensions],
+                    encoding='utf-8'
+                )
+                self.dimension = self.word2Vec_model.vector_size
+                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            else:
+                raise ValueError
         elif base_model == 'Twitter':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_modelfile, binary=True, encoding='latin-1'
