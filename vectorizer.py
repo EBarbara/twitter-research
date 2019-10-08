@@ -10,19 +10,23 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 twitter_modelfile = 'Models/word2vec_twitter_model.bin'
 google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
+twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
+twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
 
 glove_embeddings = {
     25: 'Models/glove.twitter.27B.25d.txt',
     50: 'Models/glove.twitter.27B.50d.txt',
     100: 'Models/glove.twitter.27B.100d.txt',
-    200: 'Models/glove.twitter.27B.200d.txt'
+    200: 'Models/glove.twitter.27B.200d.txt',
+    400: 'Models/Generated/GloVe_400.txt',
 }
 
 glove_parsings = {
     25: 'Models/glove2vec.twitter.27B.25d.txt',
     50: 'Models/glove2vec.twitter.27B.50d.txt',
     100: 'Models/glove2vec.twitter.27B.100d.txt',
-    200: 'Models/glove2vec.twitter.27B.200d.txt'
+    200: 'Models/glove2vec.twitter.27B.200d.txt',
+    400: 'Models/Generated/GloVe2Vec_400.txt',
 }
 
 
@@ -35,12 +39,26 @@ class Word2VecModel():
 
     def __init__(self, train_dataset, test_dataset, class_qtd, base_model):
         self.classdataset = class_qtd
-        self.word2vec_type = base_model  # 'Google' or 'Twitter', 'random'
+        self.word2vec_type = base_model
 
         self.train_tweets = self.parse_tweets(train_dataset)
         self.test_tweets = self.parse_tweets(test_dataset)
 
-        if base_model == 'Twitter':
+        if base_model == 'CBOWGen':
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                twitter_cbow_gen,
+                encoding='utf-8'
+            )
+            self.dimension = self.word2Vec_model.vector_size
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        elif base_model == 'SkipGramGen':
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                twitter_skipgram_gen,
+                encoding='utf-8'
+            )
+            self.dimension = self.word2Vec_model.vector_size
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        elif base_model == 'Twitter':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_modelfile, binary=True, encoding='latin-1'
             )
@@ -70,7 +88,7 @@ class Word2VecModel():
         train_labels = [int(tweet[0]) for tweet in self.train_tweets]
         test_labels = [int(tweet[0]) for tweet in self.test_tweets]
 
-        if self.word2vec_type in ["Twitter", 'Google']:
+        if self.word2vec_type in ['Twitter', 'Google', 'CBOWGen', 'SkipGramGen']:
             vectorizer = CountVectorizer(
                 min_df=1, stop_words='english',
                 ngram_range=(1, 1),
