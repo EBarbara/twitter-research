@@ -5,13 +5,14 @@ from deep_learning import ConvolutedNeuralNetwork
 
 if __name__ == '__main__':
     classes = '3class'
-    dimensions = 200
+    dimensions = 400
 
     glove = GloveModel(
        train_dataset='Data Collection/1_TrainingSet_3Class.csv',
        test_dataset='Data Collection/1_TestSet_3Class.csv',
        class_qtd=classes,
-       dimensions=dimensions
+       dimensions=dimensions,
+       translate=True
     )
     train_vectors, train_labels, test_vectors, test_labels = glove.vectorize()
     glove.save(train_vectors, train_labels, test_vectors, test_labels)
