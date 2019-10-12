@@ -12,6 +12,7 @@ google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
 twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
 twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
 wiki_word = 'Models/enwiki_20180420_win10_300d.txt'
+wikipedia_modelfile = 'Models/enwiki_20180420_win10_300d.txt'
 
 twitter_cbow_gen = {
     50: 'Models/Generated/W2V_cbow_50.txt',
@@ -33,6 +34,12 @@ glove_embeddings = {
     100: 'Models/glove.twitter.27B.100d.txt',
     200: 'Models/glove.twitter.27B.200d.txt',
     300: 'Models/glove.6B.300d.txt',
+}
+
+glove_gen_embeddings = {
+    50: 'Models/Generated/GloVe_50.txt',
+    100: 'Models/Generated/GloVe_100.txt',
+    200: 'Models/Generated/GloVe_200.txt',
     400: 'Models/Generated/GloVe_400.txt',
 }
 
@@ -41,7 +48,13 @@ glove_parsings = {
     50: 'Models/glove2vec.twitter.27B.50d.txt',
     100: 'Models/glove2vec.twitter.27B.100d.txt',
     200: 'Models/glove2vec.twitter.27B.200d.txt',
-    300: 'Models/glove.6B.300d_word.txt',
+    300: 'Models/glove.6B.300d.parsed.txt',
+}
+
+glove_gen_parsings = {
+    50: 'Models/Generated/GloVe2Vec_50.txt',
+    100: 'Models/Generated/GloVe2Vec_100.txt',
+    200: 'Models/Generated/GloVe2Vec_200.txt',
     400: 'Models/Generated/GloVe2Vec_400.txt',
 }
 
@@ -94,6 +107,12 @@ class Word2VecModel():
             )
             self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        elif base_model == 'Wikipedia':
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                wikipedia_modelfile, encoding='latin-1'
+            )
+            self.dimension = self.word2Vec_model.vector_size
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model in ['Google', 'random']:
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 google_modelfile, binary=True
@@ -118,7 +137,7 @@ class Word2VecModel():
         train_labels = [int(tweet[0]) for tweet in self.train_tweets]
         test_labels = [int(tweet[0]) for tweet in self.test_tweets]
 
-        if self.word2vec_type in ['Twitter', 'Google', 'CBOWGen', 'SkipGramGen']:
+        if self.word2vec_type in ['Twitter', 'Google', 'CBOWGen', 'SkipGramGen', 'Wikipedia']:
             vectorizer = CountVectorizer(
                 min_df=1, stop_words='english',
                 ngram_range=(1, 1),
@@ -197,17 +216,18 @@ class GloveModel():
         test_dataset,
         class_qtd,
         dimensions,
-        translate=False
+        translate=False,
+        generated=False
     ):
         # Necessário apenas se o modelo GloVe
         # não estiver "traduzido" para Word2Vec
         if translate:
-            glove_embedding = glove_embeddings[dimensions]
-            glove_parsing = glove_parsings[dimensions]
+            glove_embedding = glove_gen_embeddings[dimensions] if generated else glove_embeddings[dimensions]
+            glove_parsing = glove_gen_parsings[dimensions] if generated else glove_parsings[dimensions]
             _ = glove2word2vec(glove_embedding, glove_parsing)
 
         self.classdataset = class_qtd
-        glove_file = glove_parsings[dimensions]
+        glove_file = glove_gen_parsings[dimensions] if generated else glove_parsings[dimensions]
         self.gloVe_model = KeyedVectors.load_word2vec_format(
             glove_file,
             encoding='utf-8'

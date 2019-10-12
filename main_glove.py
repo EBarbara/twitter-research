@@ -5,7 +5,7 @@ from deep_learning import ConvolutedNeuralNetwork
 
 if __name__ == '__main__':
     classes = '3class'
-    dimensions = 400
+    dimensions = 300
 
     glove = GloveModel(
        train_dataset='Data Collection/1_TrainingSet_3Class.csv',
