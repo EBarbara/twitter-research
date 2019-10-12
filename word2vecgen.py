@@ -26,7 +26,7 @@ def parse_tweets(filename):
 
 trainset = 'Data Collection/1_TrainingSet_3Class.csv'
 testset = 'Data Collection/1_TrainingSet_3Class.csv'
-components = 100
+components = 50
 
 if __name__ == "__main__":
     print('Parsing tweets')

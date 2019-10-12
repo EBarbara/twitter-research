@@ -9,6 +9,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 twitter_modelfile = 'Models/word2vec_twitter_model.bin'
 google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
+twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
+twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
+wiki_word = 'Models/enwiki_20180420_win10_300d.txt'
 
 twitter_cbow_gen = {
     50: 'Models/Generated/W2V_cbow_50.txt',
@@ -29,6 +32,7 @@ glove_embeddings = {
     50: 'Models/glove.twitter.27B.50d.txt',
     100: 'Models/glove.twitter.27B.100d.txt',
     200: 'Models/glove.twitter.27B.200d.txt',
+    300: 'Models/glove.6B.300d.txt',
     400: 'Models/Generated/GloVe_400.txt',
 }
 
@@ -37,6 +41,7 @@ glove_parsings = {
     50: 'Models/glove2vec.twitter.27B.50d.txt',
     100: 'Models/glove2vec.twitter.27B.100d.txt',
     200: 'Models/glove2vec.twitter.27B.200d.txt',
+    300: 'Models/glove.6B.300d_word.txt',
     400: 'Models/Generated/GloVe2Vec_400.txt',
 }
 
@@ -75,6 +80,14 @@ class Word2VecModel():
                 self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
+        elif base_model == 'Wikipedia':
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                wiki_word,
+            )
+                encoding='utf-8'
+            self.dimension = self.word2Vec_model.vector_size
+
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'Twitter':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_modelfile, binary=True, encoding='latin-1'
