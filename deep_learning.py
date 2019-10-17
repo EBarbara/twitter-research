@@ -2,6 +2,11 @@ import pickle
 import time
 
 import keras
+from keras.callbacks import ModelCheckpoint
+from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, Reshape
+from keras.models import Sequential
+from keras.optimizers import Adam, SGD
+from keras.utils import to_categorical
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 
@@ -15,12 +20,12 @@ def train_network(
 ):
     model = network.model
 
-    test_labels = keras.utils.to_categorical(
+    test_labels = to_categorical(
         test_labels,
         num_classes=network.qtd_classes
     )
 
-    checkpoint = keras.callbacks.ModelCheckpoint(
+    checkpoint = ModelCheckpoint(
         weight_filepath,
         monitor='val_acc',
         verbose=1,
@@ -85,12 +90,12 @@ def test_network(
 
 
 class ConvolutedNeuralNetwork():
-    def __init__(self, train_vectors, train_labels):
+    def __init__(self, train_vectors, train_labels, optimizer_alg='ADAM'):
         self.start_time = time.clock()
 
         self.qtd_classes = len(list(set((train_labels))))
         self.train_vectors = train_vectors
-        self.train_labels = keras.utils.to_categorical(
+        self.train_labels = to_categorical(
             train_labels,
             num_classes=self.qtd_classes
         )
@@ -98,15 +103,15 @@ class ConvolutedNeuralNetwork():
         self.vector_length = len(train_vectors[0, :, 0])
         self.vector_dimension = len(train_vectors[0, 0, :])
 
-        self.model = keras.models.Sequential()
+        self.model = Sequential()
         self.model.add(
-            keras.layers.Reshape(
+            Reshape(
                 (self.vector_length, self.vector_dimension, 1),
                 input_shape=(self.vector_length, self.vector_dimension)
             )
         )
         self.model.add(
-            keras.layers.Conv2D(
+            Conv2D(
                 100,
                 (2, self.vector_dimension),
                 strides=(1, 1),
@@ -116,22 +121,20 @@ class ConvolutedNeuralNetwork():
             )
         )
         output = self.model.output_shape
-        self.model.add(
-            keras.layers.MaxPooling2D(pool_size=(output[1], output[2]))
-        )
-        self.model.add(keras.layers.Dropout(.5))
-        self.model.add(keras.layers.Flatten())
-        self.model.add(
-            keras.layers.Dense(self.qtd_classes, activation='softmax')
-        )
-        optimizer = keras.optimizers.Adam(
-            lr=0.001,
-            beta_1=0.9,
-            beta_2=0.999,
-            epsilon=1e-08,
-            decay=0.0
-        )
-        # optimizer = keras.optimizers.SGD()
+        self.model.add(MaxPooling2D(pool_size=(output[1], output[2])))
+        self.model.add(Dropout(.5))
+        self.model.add(Flatten())
+        self.model.add(Dense(self.qtd_classes, activation='softmax'))
+        if optimizer_alg == 'SGD':
+            optimizer = SGD()
+        else:  # default optimizer is ADAM
+            optimizer = Adam(
+                lr=0.001,
+                beta_1=0.9,
+                beta_2=0.999,
+                epsilon=1e-08,
+                decay=0.0
+            )
         self.model.compile(
             optimizer=optimizer,
             loss='categorical_crossentropy',

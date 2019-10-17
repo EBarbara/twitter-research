@@ -14,6 +14,14 @@ twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
 wiki_word = 'Models/enwiki_20180420_win10_300d.txt'
 wikipedia_modelfile = 'Models/enwiki_20180420_win10_300d.txt'
 
+vector_models = [
+    'Twitter',
+    'Google',
+    'CBOWGen',
+    'SkipGramGen',
+    'Wikipedia',
+]
+
 twitter_cbow_gen = {
     50: 'Models/Generated/W2V_cbow_50.txt',
     100: 'Models/Generated/W2V_cbow_100.txt',
@@ -96,8 +104,8 @@ class Word2VecModel():
         elif base_model == 'Wikipedia':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 wiki_word,
-            )
                 encoding='utf-8'
+            )
             self.dimension = self.word2Vec_model.vector_size
 
             self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
@@ -137,7 +145,7 @@ class Word2VecModel():
         train_labels = [int(tweet[0]) for tweet in self.train_tweets]
         test_labels = [int(tweet[0]) for tweet in self.test_tweets]
 
-        if self.word2vec_type in ['Twitter', 'Google', 'CBOWGen', 'SkipGramGen', 'Wikipedia']:
+        if self.word2vec_type in vector_models:
             vectorizer = CountVectorizer(
                 min_df=1, stop_words='english',
                 ngram_range=(1, 1),
