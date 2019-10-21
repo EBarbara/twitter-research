@@ -4,4 +4,3 @@ Keras==2.2.5
 nltk
 sklearn
 tensorflow==1.14.0
-pandas

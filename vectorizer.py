@@ -8,8 +8,8 @@ import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
 twitter_modelfile = 'Models/word2vec_twitter_model.bin'
-encoded_twitter_modelfile = 'Models/Generated/Encoded_Twitter_W2Vec.txt'
-encoded_twitter_modelfile_parsed = 'Models/Generated/Encoded_Twitter_W2Vec_parsed.txt'
+encoded_twitter_modelfile = 'Models/Generated/Encoded_Twitter_W2Vec_20.txt'
+encoded_twitter_modelfile_parsed = 'Models/Generated/Encoded_Twitter_W2Vec_parsed_20.txt'
 google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
 twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
 twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'

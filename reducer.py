@@ -14,7 +14,7 @@ twitter_modelfile = 'Models/word2vec_twitter_model.bin'
 remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
 
 n_dim = 400
-enc_dim = 5
+enc_dim = 20
 
 words = set()
 
@@ -85,17 +85,13 @@ if __name__ == '__main__':
     encode2 = Dense(200, activation='relu')(encode1)
     encode3 = Dense(100, activation='relu')(encode2)
     encode4 = Dense(50, activation='relu')(encode3)
-    encode5 = Dense(20, activation='relu')(encode4)
-    encode6 = Dense(10, activation='relu')(encode5)
-    encode7 = Dense(enc_dim, activation='relu')(encode6)
-    decode1 = Dense(10, activation='relu')(encode7)
-    decode2 = Dense(20, activation='relu')(decode1)
-    decode3 = Dense(50, activation='relu')(decode2)
-    decode4 = Dense(100, activation='relu')(decode3)
-    decode5 = Dense(200, activation='relu')(decode4)
-    decode6 = Dense(300, activation='relu')(decode5)
-    decode7 = Dense(n_dim, activation='relu')(decode6)
-    model = Model(input=input, output=decode7)
+    encode5 = Dense(enc_dim, activation='relu')(encode4)
+    decode1 = Dense(50, activation='relu')(encode5)
+    decode2 = Dense(100, activation='relu')(decode1)
+    decode3 = Dense(200, activation='relu')(decode2)
+    decode4 = Dense(300, activation='relu')(decode3)
+    decode5 = Dense(n_dim, activation='relu')(decode4)
+    model = Model(inputs=input, outputs=decode5)
     model.compile(optimizer='adam', loss='binary_crossentropy')
     print(f'Run at {time.process_time()} seconds')
 
@@ -103,21 +99,21 @@ if __name__ == '__main__':
     model.fit(
         wordvectors,
         wordvectors,
-        nb_epoch=20,
+        epochs=20,
         batch_size=100,
         shuffle=True
     )
     print(f'Run at {time.process_time()} seconds')
 
     print('Encoding vectors')
-    encoder = Model(input=input, output=encode7)
+    encoder = Model(input=input, output=encode5)
     encode_input = Input(shape=(enc_dim, ))  # WTF??
     encode_words = encoder.predict(wordvectors)
     print(f'Run at {time.process_time()} seconds')
 
     print('Saving model')
     index = len(wordlist)
-    with open(f'Models/Generated/Encoded_Twitter_W2Vec.txt', 'w') as f:
+    with open(f'Models/Generated/Encoded_Twitter_W2Vec_20.txt', 'w') as f:
         for i in range(index):
             word = wordlist[i]
             vector = encode_words[i]
