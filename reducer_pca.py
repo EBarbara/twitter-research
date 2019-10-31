@@ -68,15 +68,15 @@ if __name__ == '__main__':
         outt.write(f'{len(words)} {enc_dim}\n')  # 3039345 20
         for i, x in enumerate(words):
             final_pca_embeddings[x] = vectors_reduced[i]
-            outt.write("%s\t" % x)
+            outt.write(f'{x} ')
             for u in Ufit[0:7]:
                 final_pca_embeddings[x] = final_pca_embeddings[x] - np.dot(
                     u.transpose(), final_pca_embeddings[x]
                 ) * u
 
             for term in final_pca_embeddings[x]:
-                stringed = format(term, '.10f')
-                outt.write(f'{stringed}\t')
+                stringed = format(term, 'f')
+                outt.write(f'{stringed} ')
 
             outt.write('\n')
     print(f'Run at {time.process_time()} seconds')
