@@ -15,10 +15,12 @@ twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
 twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
 wiki_word = 'Models/enwiki_20180420_win10_300d.txt'
 wikipedia_modelfile = 'Models/enwiki_20180420_win10_300d.txt'
+twitter_pca_modelfile = 'Models/Generated/pca_embed2.txt'
 
 vector_models = [
     'Twitter',
     'Encoded_Twitter',
+    'PCA_Twitter',
     'Google',
     'CBOWGen',
     'SkipGramGen',
@@ -122,6 +124,12 @@ class Word2VecModel():
             _ = glove2word2vec(encoded_twitter_modelfile, encoded_twitter_modelfile_parsed)
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 encoded_twitter_modelfile_parsed, encoding='latin-1'
+            )
+            self.dimension = self.word2Vec_model.vector_size
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        elif base_model == 'PCA_Twitter':
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                twitter_pca_modelfile, encoding='utf-8'
             )
             self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
