@@ -1,24 +1,21 @@
-import re
 import time
 
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors
 from sklearn.decomposition import PCA
 
-train_dataset = 'Data Collection/1_TrainingSet_3Class.csv'
-test_dataset = 'Data Collection/1_TestSet_3Class.csv'
-twitter_modelfile = 'Models/word2vec_twitter_model.bin'
-remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
+modelfile = 'Models/glove2vec.twitter.27B.200d.txt'
 
-n_dim = 400
-enc_dim = 20
+n_dim = 200
+enc_dim = 100
 
 words = set()
 
 if __name__ == '__main__':
     print('loading pretrained model')
     word2Vec_model = KeyedVectors.load_word2vec_format(
-        twitter_modelfile, binary=True, encoding='latin-1'
+        modelfile,
+        encoding='utf-8'
     )
 
     vectors = []
@@ -44,7 +41,6 @@ if __name__ == '__main__':
         for u in U1[0:7]:
             x = x - np.dot(u.transpose(), x) * u
         z.append(x)
-    z_np = np.asarray(z)
     print(f'Run at {time.process_time()} seconds')
 
     print('PCA Dim Reduction')
@@ -64,11 +60,15 @@ if __name__ == '__main__':
 
     print('Saving embeddings')
     final_pca_embeddings = {}
-    with open('Models/Generated/pca_embed2.txt', 'w', encoding="utf8") as outt:
-        outt.write(f'{len(words)} {enc_dim}\n')  # 3039345 20
+    with open(
+        f'Models/Generated/pca_embed_glove_{enc_dim}.txt',
+        'w',
+        encoding="utf8"
+    ) as output:
+        output.write(f'{len(words)} {enc_dim}\n')
         for i, x in enumerate(words):
             final_pca_embeddings[x] = vectors_reduced[i]
-            outt.write(f'{x} ')
+            output.write(f'{x} ')
             for u in Ufit[0:7]:
                 final_pca_embeddings[x] = final_pca_embeddings[x] - np.dot(
                     u.transpose(), final_pca_embeddings[x]
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
             for term in final_pca_embeddings[x]:
                 stringed = format(term, 'f')
-                outt.write(f'{stringed} ')
+                output.write(f'{stringed} ')
 
-            outt.write('\n')
+            output.write('\n')
     print(f'Run at {time.process_time()} seconds')
