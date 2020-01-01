@@ -4,10 +4,10 @@ import numpy as np
 from gensim.models.keyedvectors import KeyedVectors
 from sklearn.decomposition import PCA
 
-modelfile = 'Models/glove2vec.twitter.27B.200d.txt'
+modelfile = 'E:/Models/word2vec_twitter_model.bin'
 
-n_dim = 200
-enc_dim = 100
+n_dim = 400
+enc_dim = 200
 
 words = set()
 
@@ -15,7 +15,8 @@ if __name__ == '__main__':
     print('loading pretrained model')
     word2Vec_model = KeyedVectors.load_word2vec_format(
         modelfile,
-        encoding='utf-8'
+        binary=True,
+        encoding='latin1'
     )
 
     vectors = []
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     print('Saving embeddings')
     final_pca_embeddings = {}
     with open(
-        f'Models/Generated/pca_embed_glove_{enc_dim}.txt',
+        f'E:/Models/Generated/pca_embed_{enc_dim}.txt',
         'w',
         encoding="utf8"
     ) as output:

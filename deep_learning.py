@@ -1,7 +1,7 @@
 import pickle
 import time
 
-import keras
+from keras import backend as K
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, Reshape
 from keras.models import Sequential
@@ -9,6 +9,26 @@ from keras.optimizers import Adam, SGD
 from keras.utils import to_categorical
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
+
+
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
 
 def train_network(
@@ -72,7 +92,7 @@ def test_network(
     model.compile(
         loss=loss_function,
         optimizer=optimizer_function,
-        metrics=metrics
+        metrics=metrics,
     )
     # Computer confusion matrix, precision, recall.
     pred = model.predict(test_vectors, batch_size=64) 
@@ -112,7 +132,7 @@ class ConvolutedNeuralNetwork():
         )
         self.model.add(
             Conv2D(
-                100,
+                200,
                 (2, self.vector_dimension),
                 strides=(1, 1),
                 padding='valid',

@@ -19,7 +19,7 @@ word2vec = Word2VecModel(
     train_dataset='Data Collection/1_TrainingSet_3Class.csv',
     test_dataset='Data Collection/1_TestSet_3Class.csv',
     class_qtd='3class',
-    base_model='Google'
+    base_model='PCA_Twitter'
 )
 Train_X, Train_Y, Test_X, Test_Y_ori = word2vec.vectorize()
 

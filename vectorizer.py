@@ -7,15 +7,15 @@ from gensim.scripts.glove2word2vec import glove2word2vec
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
-twitter_modelfile = 'Models/word2vec_twitter_model.bin'
-encoded_twitter_modelfile = 'Models/Generated/Encoded_Twitter_W2Vec_20.txt'
-encoded_twitter_modelfile_parsed = 'Models/Generated/Encoded_Twitter_W2Vec_parsed_20.txt'
-google_modelfile = 'Models/GoogleNews-vectors-negative300.bin'
-twitter_cbow_gen = 'Models/Generated/W2V_cbow_400.txt'
-twitter_skipgram_gen = 'Models/Generated/W2V_skipgram_400.txt'
-wiki_word = 'Models/enwiki_20180420_win10_300d.txt'
-wikipedia_modelfile = 'Models/enwiki_20180420_win10_300d.txt'
-twitter_pca_modelfile = 'Models/Generated/pca_embed2.txt'
+twitter_modelfile = 'E:/Models/word2vec_twitter_model.bin'
+encoded_twitter_modelfile = 'E:/Models/Generated/Encoded_Twitter_W2Vec_20.txt'
+encoded_twitter_modelfile_parsed = 'E:/Models/Generated/Encoded_Twitter_W2Vec_parsed_20.txt'
+google_modelfile = 'E:/Models/GoogleNews-vectors-negative300.bin'
+twitter_cbow_gen = 'E:/Models/Generated/W2V_cbow_400.txt'
+twitter_skipgram_gen = 'E:/Models/Generated/W2V_skipgram_400.txt'
+wiki_word = 'E:/Models/enwiki_20180420_win10_300d.txt'
+wikipedia_modelfile = 'E:/Models/enwiki_20180420_win10_300d.txt'
+twitter_pca_modelfile = 'E:/Models/Generated/pca_embed_100.txt'
 
 vector_models = [
     'Twitter',
@@ -28,47 +28,47 @@ vector_models = [
 ]
 
 twitter_cbow_gen = {
-    50: 'Models/Generated/W2V_cbow_50.txt',
-    100: 'Models/Generated/W2V_cbow_100.txt',
-    200: 'Models/Generated/W2V_cbow_200.txt',
-    400: 'Models/Generated/W2V_cbow_400.txt',
+    50: 'E:/Models/Generated/W2V_cbow_50.txt',
+    100: 'E:/Models/Generated/W2V_cbow_100.txt',
+    200: 'E:/Models/Generated/W2V_cbow_200.txt',
+    400: 'E:/Models/Generated/W2V_cbow_400.txt',
 }
 
 twitter_skipgram_gen = {
-    50: 'Models/Generated/W2V_skipgram_50.txt',
-    100: 'Models/Generated/W2V_skipgram_100.txt',
-    200: 'Models/Generated/W2V_skipgram_200.txt',
-    400: 'Models/Generated/W2V_skipgram_400.txt',
+    50: 'E:/Models/Generated/W2V_skipgram_50.txt',
+    100: 'E:/Models/Generated/W2V_skipgram_100.txt',
+    200: 'E:/Models/Generated/W2V_skipgram_200.txt',
+    400: 'E:/Models/Generated/W2V_skipgram_400.txt',
 }
 
 glove_embeddings = {
-    25: 'Models/glove.twitter.27B.25d.txt',
-    50: 'Models/glove.twitter.27B.50d.txt',
-    100: 'Models/glove.twitter.27B.100d.txt',
-    200: 'Models/glove.twitter.27B.200d.txt',
-    300: 'Models/glove.6B.300d.txt',
+    25: 'E:/Models/glove.twitter.27B.25d.txt',
+    50: 'E:/Models/glove.twitter.27B.50d.txt',
+    100: 'E:/Models/glove.twitter.27B.100d.txt',
+    200: 'E:/Models/glove.twitter.27B.200d.txt',
+    300: 'E:/Models/glove.6B.300d.txt',
 }
 
 glove_gen_embeddings = {
-    50: 'Models/Generated/GloVe_50.txt',
-    100: 'Models/Generated/GloVe_100.txt',
-    200: 'Models/Generated/GloVe_200.txt',
-    400: 'Models/Generated/GloVe_400.txt',
+    50: 'E:/Models/Generated/GloVe_50.txt',
+    100: 'E:/Models/Generated/GloVe_100.txt',
+    200: 'E:/Models/Generated/GloVe_200.txt',
+    400: 'E:/Models/Generated/GloVe_400.txt',
 }
 
 glove_parsings = {
-    25: 'Models/glove2vec.twitter.27B.25d.txt',
-    50: 'Models/glove2vec.twitter.27B.50d.txt',
-    100: 'Models/glove2vec.twitter.27B.100d.txt',
-    200: 'Models/glove2vec.twitter.27B.200d.txt',
-    300: 'Models/glove.6B.300d.parsed.txt',
+    25: 'E:/Models/glove2vec.twitter.27B.25d.txt',
+    50: 'E:/Models/glove2vec.twitter.27B.50d.txt',
+    100: 'E:/Models/glove2vec.twitter.27B.100d.txt',
+    200: 'E:/Models/glove2vec.twitter.27B.200d.txt',
+    300: 'E:/Models/glove.6B.300d.parsed.txt',
 }
 
 glove_gen_parsings = {
-    50: 'Models/Generated/GloVe2Vec_50.txt',
-    100: 'Models/Generated/GloVe2Vec_100.txt',
-    200: 'Models/Generated/GloVe2Vec_200.txt',
-    400: 'Models/Generated/GloVe2Vec_400.txt',
+    50: 'E:/Models/Generated/GloVe2Vec_50.txt',
+    100: 'E:/Models/Generated/GloVe2Vec_100.txt',
+    200: 'E:/Models/Generated/GloVe2Vec_200.txt',
+    400: 'E:/Models/Generated/GloVe2Vec_400.txt',
 }
 
 
@@ -136,6 +136,13 @@ class Word2VecModel():
         elif base_model == 'Wikipedia':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 wikipedia_modelfile, encoding='latin-1'
+            )
+            self.dimension = self.word2Vec_model.vector_size
+            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        elif base_model == 'Twitter_200':
+            tw_model = 'E:/Models/Generated/pca_embed_200.txt'
+            self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                tw_model, encoding='utf-8'
             )
             self.dimension = self.word2Vec_model.vector_size
             self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
