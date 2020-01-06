@@ -1,3 +1,4 @@
+from collections import Counter
 import pickle
 import time
 
@@ -28,15 +29,15 @@ def precision_m(y_true, y_pred):
 def f1_m(y_true, y_pred):
     precision = precision_m(y_true, y_pred)
     recall = recall_m(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
 
 def train_network(
-    network,
-    test_vectors,
-    test_labels,
-    weight_filepath,
-    hist_filepath=None
+        network,
+        test_vectors,
+        test_labels,
+        weight_filepath,
+        hist_filepath=None
 ):
     model = network.model
 
@@ -59,7 +60,8 @@ def train_network(
         epochs=20,
         batch_size=64,
         shuffle=False,
-        validation_data=(test_vectors, test_labels),  # faz sentido... ele precisaria do gabarito para escolher o melhor modelo
+        validation_data=(test_vectors, test_labels),
+        # faz sentido... ele precisaria do gabarito para escolher o melhor modelo
         callbacks=callbacks_list
     )
 
@@ -77,13 +79,13 @@ def train_network(
 
 
 def test_network(
-    network,
-    weight_filepath,
-    loss_function,
-    optimizer_function,
-    metrics,
-    test_vectors,
-    test_labels
+        network,
+        weight_filepath,
+        loss_function,
+        optimizer_function,
+        metrics,
+        test_vectors,
+        test_labels
 ):
     model = network.model
     # load weights, predict based on the best model, compute accuracy, precision, recall, f-score, confusion matrix.
@@ -95,11 +97,11 @@ def test_network(
         metrics=metrics,
     )
     # Computer confusion matrix, precision, recall.
-    pred = model.predict(test_vectors, batch_size=64) 
+    pred = model.predict(test_vectors, batch_size=64)
     pred_labels = np.argmax(pred, axis=1)
     real_labels = [int(item) for item in test_labels]
 
-    accuracy = len(np.where(pred_labels == np.array(real_labels))[0])/len(real_labels) * 100
+    accuracy = len(np.where(pred_labels == np.array(real_labels))[0]) / len(real_labels) * 100
     print(f'Test Accuracy %: {accuracy}\n')
 
     print('Confusion matrix:')
@@ -109,14 +111,44 @@ def test_network(
     print(classification_report(real_labels, pred_labels, digits=3))
 
 
-class ConvolutedNeuralNetwork():
-    def __init__(self, train_vectors, train_labels, optimizer_alg='ADAM'):
-        self.start_time = time.clock()
+class ConvolutedNeuralNetwork:
+    def __init__(
+            self,
+            train_vectors,
+            train_labels,
+            test_vectors,
+            test_labels,
+            weight_filepath,
+            optimizer_alg='ADAM'
+    ):
+        start_time = time.clock()
 
-        self.qtd_classes = len(list(set((train_labels))))
+        self.loss_function = 'categorical_crossentropy'
+        self.metrics = ['accuracy']
+
+        self.train_time = 0
+        self.precision_raw = 0
+        self.recall_raw = 0
+        self.f1_raw = 0
+        self.confusion_raw = None
+        self.test_raw_time = 0
+        self.precision_load = 0
+        self.recall_load = 0
+        self.f1_load = 0
+        self.confusion_load = None
+        self.test_load_time = 0
+
+        self.weight_filepath = weight_filepath
+
+        self.qtd_classes = len(list(set(train_labels)))
         self.train_vectors = train_vectors
         self.train_labels = to_categorical(
             train_labels,
+            num_classes=self.qtd_classes
+        )
+        self.test_vectors = test_vectors
+        self.test_labels = to_categorical(
+            test_labels,
             num_classes=self.qtd_classes
         )
 
@@ -146,9 +178,9 @@ class ConvolutedNeuralNetwork():
         self.model.add(Flatten())
         self.model.add(Dense(self.qtd_classes, activation='softmax'))
         if optimizer_alg == 'SGD':
-            optimizer = SGD()
+            self.optimizer = SGD()
         else:  # default optimizer is ADAM
-            optimizer = Adam(
+            self.optimizer = Adam(
                 lr=0.001,
                 beta_1=0.9,
                 beta_2=0.999,
@@ -156,12 +188,78 @@ class ConvolutedNeuralNetwork():
                 decay=0.0
             )
         self.model.compile(
-            optimizer=optimizer,
-            loss='categorical_crossentropy',
-            metrics=['accuracy']
+            optimizer=self.optimizer,
+            loss=self.loss_function,
+            metrics=self.metrics
         )
 
+        self.load_time = time.clock() - start_time
 
-class LongShortTermMemoryNetwork():
+    def train(self):
+        start_time = time.clock()
+        checkpoint = ModelCheckpoint(
+            self.weight_filepath,
+            monitor='val_acc',
+            verbose=1,
+            save_best_only=True,
+            mode='max'
+        )
+        callbacks_list = [checkpoint]
+        hist = self.model.fit(
+            self.train_vectors,
+            self.train_labels,
+            epochs=20,
+            batch_size=64,
+            shuffle=False,
+            validation_data=(self.test_vectors, self.test_labels),
+            callbacks=callbacks_list
+        )
+
+        self.train_time = (time.clock() - start_time)
+
+    def test_raw(self):
+        start_time = time.clock()
+
+        pred = self.model.predict(self.test_vectors, batch_size=64)
+        pred_labels = np.argmax(pred, axis=1)
+        real_labels = np.array([int(item) for item in self.test_labels])
+        result_prediction = []
+        for pred, real in np.nditer([pred_labels, real_labels]):
+            result_prediction.append(pred * 10 + real)
+        result_count = Counter(result_prediction)
+
+        self.precision_raw = result_count[11] / (result_count[11] + result_count[10])
+        self.recall_raw = result_count[11] / (result_count[11] + result_count[1])
+        self.f1_raw = 2*((self.precision_raw * self.recall_raw)/(self.precision_raw + self.recall_raw))
+        self.confusion_raw = confusion_matrix(real_labels, pred_labels)
+
+        self.test_raw_time = (time.clock() - start_time)
+
+    def test_loading(self):
+        start_time = time.clock()
+        self.model.load_weights(self.weight_filepath)
+        self.model.compile(
+            optimizer=self.optimizer,
+            loss=self.loss_function,
+            metrics=self.metrics
+        )
+
+        pred = self.model.predict(self.test_vectors, batch_size=64)
+        pred_labels = np.argmax(pred, axis=1)
+        real_labels = np.array([int(item) for item in self.test_labels])
+        result_prediction = []
+        for pred, real in np.nditer([pred_labels, real_labels]):
+            result_prediction.append(pred * 10 + real)
+        result_count = Counter(result_prediction)
+
+        self.precision_load = result_count[11] / (result_count[11] + result_count[10])
+        self.recall_load = result_count[11] / (result_count[11] + result_count[1])
+        self.f1_load = 2*((self.precision_load * self.recall_load)/(self.precision_load + self.recall_load))
+        self.confusion_load = confusion_matrix(real_labels, pred_labels)
+
+        self.test_load_time = (time.clock() - start_time)
+
+
+class LongShortTermMemoryNetwork:
     def __init__(self):
         pass
