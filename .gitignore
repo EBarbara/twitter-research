@@ -126,6 +126,9 @@ dmypy.json
 # VSCode files
 .vscode/
 
+# PyCharm files
+.idea/
+
 # Data
 /Data Collection
 /Models
