@@ -127,14 +127,10 @@ class ConvolutedNeuralNetwork:
         self.metrics = ['accuracy']
 
         self.train_time = 0
-        self.precision_raw = 0
-        self.recall_raw = 0
-        self.f1_raw = 0
+        self.metrics_raw = None
         self.confusion_raw = None
         self.test_raw_time = 0
-        self.precision_load = 0
-        self.recall_load = 0
-        self.f1_load = 0
+        self.metrics_load = None
         self.confusion_load = None
         self.test_load_time = 0
 
@@ -151,6 +147,7 @@ class ConvolutedNeuralNetwork:
             test_labels,
             num_classes=self.qtd_classes
         )
+        self.real_labels = np.array([int(item) for item in test_labels])
 
         self.vector_length = len(train_vectors[0, :, 0])
         self.vector_dimension = len(train_vectors[0, 0, :])
@@ -205,7 +202,7 @@ class ConvolutedNeuralNetwork:
             mode='max'
         )
         callbacks_list = [checkpoint]
-        hist = self.model.fit(
+        self.model.fit(
             self.train_vectors,
             self.train_labels,
             epochs=20,
@@ -222,17 +219,9 @@ class ConvolutedNeuralNetwork:
 
         pred = self.model.predict(self.test_vectors, batch_size=64)
         pred_labels = np.argmax(pred, axis=1)
-        real_labels = np.array([int(item) for item in self.test_labels])
-        result_prediction = []
-        for pred, real in np.nditer([pred_labels, real_labels]):
-            result_prediction.append(pred * 10 + real)
-        result_count = Counter(result_prediction)
 
-        self.precision_raw = result_count[11] / (result_count[11] + result_count[10])
-        self.recall_raw = result_count[11] / (result_count[11] + result_count[1])
-        self.f1_raw = 2*((self.precision_raw * self.recall_raw)/(self.precision_raw + self.recall_raw))
-        self.confusion_raw = confusion_matrix(real_labels, pred_labels)
-
+        self.metrics_raw = self.calculate_metrics(pred_labels)
+        self.confusion_raw = confusion_matrix(self.real_labels, pred_labels)
         self.test_raw_time = (time.clock() - start_time)
 
     def test_loading(self):
@@ -246,18 +235,47 @@ class ConvolutedNeuralNetwork:
 
         pred = self.model.predict(self.test_vectors, batch_size=64)
         pred_labels = np.argmax(pred, axis=1)
-        real_labels = np.array([int(item) for item in self.test_labels])
-        result_prediction = []
-        for pred, real in np.nditer([pred_labels, real_labels]):
-            result_prediction.append(pred * 10 + real)
-        result_count = Counter(result_prediction)
 
-        self.precision_load = result_count[11] / (result_count[11] + result_count[10])
-        self.recall_load = result_count[11] / (result_count[11] + result_count[1])
-        self.f1_load = 2*((self.precision_load * self.recall_load)/(self.precision_load + self.recall_load))
-        self.confusion_load = confusion_matrix(real_labels, pred_labels)
-
+        self.metrics_load = self.calculate_metrics(pred_labels)
+        self.confusion_load = confusion_matrix(self.real_labels, pred_labels)
         self.test_load_time = (time.clock() - start_time)
+
+    def calculate_metrics(self, pred_labels):
+        result = {}
+        if self.qtd_classes == 2:
+            result = self.evaluate_class(pred_labels, 1)
+            result['type'] = 'binary'
+        else:
+            result['type'] = 'multiclass'
+            for i in range(self.qtd_classes):
+                result[f'class_{i}'] = self.evaluate_class(pred_labels, i)
+        return result
+
+    def evaluate_class(self, pred_labels, class_id):
+        result_prediction = []
+        for pred, real in np.nditer([pred_labels, self.real_labels]):
+            if pred == class_id and real == class_id:
+                result_prediction.append('True positive')
+            elif pred == class_id:
+                result_prediction.append('False positive')
+            elif real == class_id:
+                result_prediction.append('False negative')
+            else:
+                result_prediction.append('True negative')
+        result_count = Counter(result_prediction)
+        true_positives = result_count['True positive']
+        positives = true_positives + result_count['False positive']
+        relevants = true_positives + result_count['False negative']
+
+        precision = true_positives / positives
+        recall = true_positives / relevants
+        f1 = 2*((precision * recall)/(precision + recall))
+
+        return {
+            'precision': precision,
+            'recall': recall,
+            'f1': f1
+        }
 
 
 class LongShortTermMemoryNetwork:
