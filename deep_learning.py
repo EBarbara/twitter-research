@@ -8,6 +8,7 @@ from keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D, Reshape
 from keras.models import Sequential
 from keras.optimizers import Adam, SGD
 from keras.utils import to_categorical
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 
@@ -61,9 +62,26 @@ def train_network(
         batch_size=64,
         shuffle=False,
         validation_data=(test_vectors, test_labels),
-        # faz sentido... ele precisaria do gabarito para escolher o melhor modelo
         callbacks=callbacks_list
     )
+
+    # Plot training & validation accuracy values
+    plt.plot(hist.history['acc'])
+    plt.plot(hist.history['val_acc'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
+
+    # Plot training & validation loss values
+    plt.plot(hist.history['loss'])
+    plt.plot(hist.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.show()
 
     # Print the maximum acc_val and its corresponding epoch
     index = np.argmax(hist.history['val_acc'])
