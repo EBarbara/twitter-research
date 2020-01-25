@@ -1,3 +1,4 @@
+import os
 from statistics import mean
 
 from deep_learning import ConvolutedNeuralNetwork
@@ -22,7 +23,7 @@ def print_data(filepath, line):
 
 
 def gen_header(filepath):
-    print_data(filepath, 'train_time,test_raw_time,test_load_time,precision_raw,recall_raw,f1_raw,precision_load,recall_load,f1_load')
+    print_data(filepath, 'train_time,test_time,class_0_precision,class_0_recall,class_0_f1,class_1_precision,class_1_recall,class_1_f1,class_2_precision,class_2_recall,class_2_f1')
 
 
 def run_network(network_type):
@@ -44,30 +45,19 @@ def run_network(network_type):
             weight_filepath=WEIGHT_FILEPATH
         )
         cnn.train()
-        cnn.test_raw()
-        cnn.test_loading()
+        cnn.test()
         return (
-            f"{cnn.train_time}s",
-            f"{cnn.test_raw_time}s",
-            f"{cnn.test_load_time}s",
-            f"{cnn.metrics_raw['class_0']['precision'] * 100}%",
-            f"{cnn.metrics_raw['class_0']['recall'] * 100}%",
-            f"{cnn.metrics_raw['class_0']['f1'] * 100}%",
-            f"{cnn.metrics_raw['class_1']['precision'] * 100}%",
-            f"{cnn.metrics_raw['class_1']['recall'] * 100}%",
-            f"{cnn.metrics_raw['class_1']['f1'] * 100}%",
-            f"{cnn.metrics_raw['class_2']['precision'] * 100}%",
-            f"{cnn.metrics_raw['class_2']['recall'] * 100}%",
-            f"{cnn.metrics_raw['class_2']['f1'] * 100}%",
-            f"{cnn.metrics_load['class_0']['precision'] * 100}%",
-            f"{cnn.metrics_load['class_0']['recall'] * 100}%",
-            f"{cnn.metrics_load['class_0']['f1'] * 100}%",
-            f"{cnn.metrics_load['class_1']['precision'] * 100}%",
-            f"{cnn.metrics_load['class_1']['recall'] * 100}%",
-            f"{cnn.metrics_load['class_1']['f1'] * 100}%",
-            f"{cnn.metrics_load['class_2']['precision'] * 100}%",
-            f"{cnn.metrics_load['class_2']['recall'] * 100}%",
-            f"{cnn.metrics_load['class_2']['f1'] * 100}%"
+            cnn.train_time,
+            cnn.test_time,
+            cnn.metrics['class_0']['precision'],
+            cnn.metrics['class_0']['recall'],
+            cnn.metrics['class_0']['f1'],
+            cnn.metrics['class_1']['precision'],
+            cnn.metrics['class_1']['recall'],
+            cnn.metrics['class_1']['f1'],
+            cnn.metrics['class_2']['precision'],
+            cnn.metrics['class_2']['recall'],
+            cnn.metrics['class_2']['f1']
         )
     elif network == LSTM:
         pass
@@ -76,31 +66,50 @@ def run_network(network_type):
 
 
 def run(num_runs, filepath, network):
-    #precision_values = []
-    #recall_values = []
-    #accuracy_values = []
-    #vectorizing_times = []
-    #training_times = []
+    train_time_values = []
+    test_time_values = []
+    class_0_precision_values = []
+    class_0_recall_values = []
+    class_0_f1_values = []
+    class_1_precision_values = []
+    class_1_recall_values = []
+    class_1_f1_values = []
+    class_2_precision_values = []
+    class_2_recall_values = []
+    class_2_f1_values = []
 
     for instance in range(num_runs):
+        if os.path.exists(WEIGHT_FILEPATH):
+            os.remove(WEIGHT_FILEPATH)
+
         results = run_network(network)
-        print('-----------------------------------')
-        print_data(filepath, ','.join(results))
 
-        #precision_values.append(results[0])
-        #recall_values.append(results[1])
-        #accuracy_values.append(results[2])
-        #vectorizing_times.append(results[3])
-        #training_times.append(results[4])
+        train_time_values.append(results[0])
+        test_time_values.append(results[1])
+        class_0_precision_values.append(results[2])
+        class_0_recall_values.append(results[3])
+        class_0_f1_values.append(results[4])
+        class_1_precision_values.append(results[5])
+        class_1_recall_values.append(results[6])
+        class_1_f1_values.append(results[7])
+        class_2_precision_values.append(results[8])
+        class_2_recall_values.append(results[9])
+        class_2_f1_values.append(results[10])
 
-    #line_results = [
-    #    mean(precision_values),
-    #    mean(recall_values),
-    #    mean(accuracy_values),
-    #    mean(vectorizing_times),
-    #    mean(training_times)
-    #]
-    #print_data(filepath, ','.join(line_results))
+    line_results = [
+        str(mean(train_time_values)),
+        str(mean(test_time_values)),
+        str(mean(class_0_precision_values)),
+        str(mean(class_0_recall_values)),
+        str(mean(class_0_f1_values)),
+        str(mean(class_1_precision_values)),
+        str(mean(class_1_recall_values)),
+        str(mean(class_1_f1_values)),
+        str(mean(class_2_precision_values)),
+        str(mean(class_2_recall_values)),
+        str(mean(class_2_f1_values)),
+    ]
+    print_data(filepath, ','.join(line_results))
 
 
 if __name__ == "__main__":

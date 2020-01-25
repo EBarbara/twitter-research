@@ -232,17 +232,7 @@ class ConvolutedNeuralNetwork:
 
         self.train_time = (time.clock() - start_time)
 
-    def test_raw(self):
-        start_time = time.clock()
-
-        pred = self.model.predict(self.test_vectors, batch_size=64)
-        pred_labels = np.argmax(pred, axis=1)
-
-        self.metrics_raw = self.calculate_metrics(pred_labels)
-        self.confusion_raw = confusion_matrix(self.real_labels, pred_labels)
-        self.test_raw_time = (time.clock() - start_time)
-
-    def test_loading(self):
+    def test(self):
         start_time = time.clock()
         self.model.load_weights(self.weight_filepath)
         self.model.compile(
@@ -254,9 +244,9 @@ class ConvolutedNeuralNetwork:
         pred = self.model.predict(self.test_vectors, batch_size=64)
         pred_labels = np.argmax(pred, axis=1)
 
-        self.metrics_load = self.calculate_metrics(pred_labels)
-        self.confusion_load = confusion_matrix(self.real_labels, pred_labels)
-        self.test_load_time = (time.clock() - start_time)
+        self.metrics = self.calculate_metrics(pred_labels)
+        self.confusion = confusion_matrix(self.real_labels, pred_labels)
+        self.test_time = (time.clock() - start_time)
 
     def calculate_metrics(self, pred_labels):
         result = {}
