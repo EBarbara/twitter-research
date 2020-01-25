@@ -18,8 +18,9 @@ networks = [CNN]
 
 
 def print_data(filepath, line):
-    print(line)
-    print('-----Should be on a file------')
+    with open(filepath, 'a') as file:
+        file.write(line)
+        file.write('\n')
 
 
 def gen_header(filepath):
