@@ -3,5 +3,6 @@ jupyter
 Keras==2.2.5
 matplotlib
 nltk
+numpy
 sklearn
-tensorflow==1.15.0
+tensorflow==1.15.2
