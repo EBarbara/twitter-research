@@ -1,6 +1,7 @@
 import csv
 import pickle
 import re
+import time
 
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
@@ -24,6 +25,9 @@ vector_models = [
     'Google',
     'CBOWGen',
     'SkipGramGen',
+    'Pt-BR_Word2Vec',
+    'Pt-BR_GloVe',
+    'Pt-BR_FastText',
     'Wikipedia',
 ]
 
@@ -71,6 +75,29 @@ glove_gen_parsings = {
     400: 'E:/Models/Generated/GloVe2Vec_400.txt',
 }
 
+pt_br_w2v = {
+    50: 'E:/Models/skip_s50.txt',
+    100: 'E:/Models/skip_s100.txt',
+    300: 'E:/Models/skip_s300.txt',
+    600: 'E:/Models/skip_s600.txt',
+    1000: 'E:/Models/skip_s1000.txt',
+}
+
+pt_br_glove = {
+    50: 'E:/Models/glove_s50.txt',
+    100: 'E:/Models/glove_s100.txt',
+    300: 'E:/Models/glove_s300.txt',
+    600: 'E:/Models/glove_s600.txt',
+    1000: 'E:/Models/glove_s1000.txt',
+}
+
+pt_br_fasttext = {
+    50: 'E:/Models/fast_s50.txt',
+    100: 'E:/Models/fast_s100.txt',
+    300: 'E:/Models/fast_s300.txt',
+    600: 'E:/Models/fast_s600.txt',
+    1000: 'E:/Models/fast_s1000.txt',
+}
 
 # Cleaning process to remove any punctuation, parentheses, question marks.
 # This leaves only alphanumeric characters.
@@ -80,6 +107,7 @@ remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
 class Word2VecModel():
 
     def __init__(self, train_dataset, test_dataset, class_qtd, base_model, set_dimensions=None):
+        self.start_time = time.clock()
         self.classdataset = class_qtd
         self.word2vec_type = base_model
 
@@ -100,6 +128,36 @@ class Word2VecModel():
             if set_dimensions:
                 self.word2Vec_model = KeyedVectors.load_word2vec_format(
                     twitter_skipgram_gen[set_dimensions],
+                    encoding='utf-8'
+                )
+                self.dimension = self.word2Vec_model.vector_size
+                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            else:
+                raise ValueError
+        elif base_model == 'Pt-BR_Word2Vec':
+            if set_dimensions:
+                self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                    pt_br_w2v[set_dimensions],
+                    encoding='utf-8'
+                )
+                self.dimension = self.word2Vec_model.vector_size
+                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            else:
+                raise ValueError
+        elif base_model == 'Pt-BR_GloVe':
+            if set_dimensions:
+                self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                    pt_br_glove[set_dimensions],
+                    encoding='utf-8'
+                )
+                self.dimension = self.word2Vec_model.vector_size
+                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            else:
+                raise ValueError
+        elif base_model == 'Pt-BR_FastText':
+            if set_dimensions:
+                self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                    pt_br_fasttext[set_dimensions],
                     encoding='utf-8'
                 )
                 self.dimension = self.word2Vec_model.vector_size
@@ -193,7 +251,14 @@ class Word2VecModel():
             self.word2vec_type
         ))
 
-        return train_vectors, train_labels, test_vectors, test_labels
+        vectorizing_time = time.clock() - self.start_time
+        return {
+            'train_vectors': train_vectors,
+            'train_labels': train_labels,
+            'test_vectors': test_vectors,
+            'test_labels': test_labels, 
+            'vectorizing_time': vectorizing_time,
+        }
 
     def model_vectorize(self, tweet_base, analyzer):
         values = np.zeros(
