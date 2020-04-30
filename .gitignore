@@ -133,3 +133,6 @@ dmypy.json
 /Data Collection
 /Models
 *.csv
+!/Data Collection/Classified/*
+!/Data Collection/Merged_classified/*
+!/Data Collection/Original/*
