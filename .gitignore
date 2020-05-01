@@ -130,9 +130,9 @@ dmypy.json
 .idea/
 
 # Data
-/Data Collection
+/Data Collection/*
 /Models
-*.csv
-!/Data Collection/Classified/
-!/Data Collection/Merged_classified/
-!/Data Collection/Original/
+/*.csv
+!/Data Collection/Classified/*.csv
+!/Data Collection/Merged_classified/*.csv
+!/Data Collection/Original/*.csv

@@ -96,8 +96,8 @@ def run_network(config):
     dimensions = config[2]
 
     vector = Word2VecModel(
-        train_dataset='Data Collection/Classified/2class_training_br.csv',
-        test_dataset='Data Collection/Classified/2class_testing_br.csv',
+        train_dataset='dataset/Classified/2class_training_br.csv',
+        test_dataset='dataset/Classified/2class_testing_br.csv',
         class_qtd='2class',
         base_model=vectorizer,
         set_dimensions=dimensions
