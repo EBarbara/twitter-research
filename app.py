@@ -29,8 +29,9 @@ f1\
 '''
 
 # CONFIGS
-num_runs = 10
-filepath = 'data.csv'
+# num_runs = 10
+num_runs = 2
+filepath = 'data_final_5.csv'
 configs = [
     # (W2V, CNN, 50),
     # (W2V, CNN, 100),
@@ -57,8 +58,8 @@ configs = [
     # (GLOVE, LSTM, 300),
     # (GLOVE, LSTM, 600),
     # (GLOVE, LSTM, 1000),
-    # (GLOVE, CNN_LSTM, 50),
-    # (GLOVE, CNN_LSTM, 100),
+    (GLOVE, CNN_LSTM, 50),
+    (GLOVE, CNN_LSTM, 100),
     # (GLOVE, CNN_LSTM, 300),
     # (GLOVE, CNN_LSTM, 600),
     # (GLOVE, CNN_LSTM, 1000),
@@ -74,9 +75,27 @@ configs = [
     # (FAST, LSTM, 1000),
     # (FAST, CNN_LSTM, 50),
     # (FAST, CNN_LSTM, 100),
-    (FAST, CNN_LSTM, 300),
+    # (FAST, CNN_LSTM, 300),
     # (FAST, CNN_LSTM, 600),
     # (FAST, CNN_LSTM, 1000),
+    # (W2V, CNN, 1000, 300),
+    # (W2V, CNN, 600, 300),
+    # (W2V, LSTM, 1000, 300),
+    # (W2V, LSTM, 600, 300),
+    # (W2V, CNN_LSTM, 1000, 300),
+    # (W2V, CNN_LSTM, 600, 300),
+    # (GLOVE, CNN, 1000, 300),
+    # (GLOVE, CNN, 600, 300),
+    # (GLOVE, LSTM, 1000, 300),
+    # (GLOVE, LSTM, 600, 300),
+    # (GLOVE, CNN_LSTM, 1000, 300),
+    # (GLOVE, CNN_LSTM, 600, 300),
+    # (FAST, CNN, 1000, 300),
+    # (FAST, CNN, 600, 300),
+    # (FAST, LSTM, 1000, 300),
+    # (FAST, LSTM, 600, 300),
+    # (FAST, CNN_LSTM, 1000, 300),
+    # (FAST, CNN_LSTM, 600, 300),
 ]
 
 
@@ -94,13 +113,16 @@ def run_network(config):
     vectorizer = config[0]
     network_type = config[1]
     dimensions = config[2]
+    # reduction = config[3] if config[3] else None
+    reduction = None
 
     vector = Word2VecModel(
-        train_dataset='dataset/Classified/2class_training_br.csv',
-        test_dataset='dataset/Classified/2class_testing_br.csv',
+        train_dataset='dataset/Labelled/2class_training_br.csv',
+        test_dataset='dataset/Labelled/2class_testing_br.csv',
         class_qtd='2class',
         base_model=vectorizer,
-        set_dimensions=dimensions
+        set_dimensions=dimensions,
+        reduced_dimenstions=reduction
     )
 
     vectorized = vector.vectorize()
@@ -161,6 +183,7 @@ def run(num_runs, filepath, config):
         line_results = [
             str(config[0]),
             str(config[2]),
+            'None',  # str(config[3]),
             str(config[1]),
             str(results[0]),
             str(results[1]),
@@ -176,7 +199,7 @@ if __name__ == "__main__":
     gen_header(filepath=filepath)
     for config in configs:
         run(
-            num_runs=10,
+            num_runs=num_runs,
             filepath=filepath,
             config=config
         )

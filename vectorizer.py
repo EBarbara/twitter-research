@@ -5,18 +5,25 @@ import time
 
 from gensim.models.keyedvectors import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
+from nltk.corpus import stopwords
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer
 
-twitter_modelfile = 'E:/Models/word2vec_twitter_model.bin'
-encoded_twitter_modelfile = 'E:/Models/Generated/Encoded_Twitter_W2Vec_20.txt'
-encoded_twitter_modelfile_parsed = 'E:/Models/Generated/Encoded_Twitter_W2Vec_parsed_20.txt'
-google_modelfile = 'E:/Models/GoogleNews-vectors-negative300.bin'
-twitter_cbow_gen = 'E:/Models/Generated/W2V_cbow_400.txt'
-twitter_skipgram_gen = 'E:/Models/Generated/W2V_skipgram_400.txt'
-wiki_word = 'E:/Models/enwiki_20180420_win10_300d.txt'
-wikipedia_modelfile = 'E:/Models/enwiki_20180420_win10_300d.txt'
-twitter_pca_modelfile = 'E:/Models/Generated/pca_embed_100.txt'
+twitter_modelfile = 'D:/models/word2vec_twitter_model.bin'
+encoded_twitter_modelfile = 'D:/models/Generated/Encoded_Twitter_W2Vec_20.txt'
+encoded_twitter_modelfile_parsed = 'D:/models/Generated/Encoded_Twitter_W2Vec_parsed_20.txt'
+google_modelfile = 'D:/models/GoogleNews-vectors-negative300.bin'
+twitter_cbow_gen = 'D:/models/Generated/W2V_cbow_400.txt'
+twitter_skipgram_gen = 'D:/models/Generated/W2V_skipgram_400.txt'
+wiki_word = 'D:/models/enwiki_20180420_win10_300d.txt'
+wikipedia_modelfile = 'D:/models/enwiki_20180420_win10_300d.txt'
+twitter_pca_modelfile = 'D:/models/Generated/pca_embed_100.txt'
+
+#truncate = 13
+truncate = 30
+
+base_stop_words = stopwords.words('portuguese')
+stop_words = frozenset(base_stop_words)
 
 vector_models = [
     'Twitter',
@@ -32,71 +39,86 @@ vector_models = [
 ]
 
 twitter_cbow_gen = {
-    50: 'E:/Models/Generated/W2V_cbow_50.txt',
-    100: 'E:/Models/Generated/W2V_cbow_100.txt',
-    200: 'E:/Models/Generated/W2V_cbow_200.txt',
-    400: 'E:/Models/Generated/W2V_cbow_400.txt',
+    50: 'D:/models/Generated/W2V_cbow_50.txt',
+    100: 'D:/models/Generated/W2V_cbow_100.txt',
+    200: 'D:/models/Generated/W2V_cbow_200.txt',
+    400: 'D:/models/Generated/W2V_cbow_400.txt',
 }
 
 twitter_skipgram_gen = {
-    50: 'E:/Models/Generated/W2V_skipgram_50.txt',
-    100: 'E:/Models/Generated/W2V_skipgram_100.txt',
-    200: 'E:/Models/Generated/W2V_skipgram_200.txt',
-    400: 'E:/Models/Generated/W2V_skipgram_400.txt',
+    50: 'D:/models/Generated/W2V_skipgram_50.txt',
+    100: 'D:/models/Generated/W2V_skipgram_100.txt',
+    200: 'D:/models/Generated/W2V_skipgram_200.txt',
+    400: 'D:/models/Generated/W2V_skipgram_400.txt',
 }
 
 glove_embeddings = {
-    25: 'E:/Models/glove.twitter.27B.25d.txt',
-    50: 'E:/Models/glove.twitter.27B.50d.txt',
-    100: 'E:/Models/glove.twitter.27B.100d.txt',
-    200: 'E:/Models/glove.twitter.27B.200d.txt',
-    300: 'E:/Models/glove.6B.300d.txt',
+    25: 'D:/models/glove.twitter.27B.25d.txt',
+    50: 'D:/models/glove.twitter.27B.50d.txt',
+    100: 'D:/models/glove.twitter.27B.100d.txt',
+    200: 'D:/models/glove.twitter.27B.200d.txt',
+    300: 'D:/models/glove.6B.300d.txt',
 }
 
 glove_gen_embeddings = {
-    50: 'E:/Models/Generated/GloVe_50.txt',
-    100: 'E:/Models/Generated/GloVe_100.txt',
-    200: 'E:/Models/Generated/GloVe_200.txt',
-    400: 'E:/Models/Generated/GloVe_400.txt',
+    50: 'D:/models/Generated/GloVe_50.txt',
+    100: 'D:/models/Generated/GloVe_100.txt',
+    200: 'D:/models/Generated/GloVe_200.txt',
+    400: 'D:/models/Generated/GloVe_400.txt',
 }
 
 glove_parsings = {
-    25: 'E:/Models/glove2vec.twitter.27B.25d.txt',
-    50: 'E:/Models/glove2vec.twitter.27B.50d.txt',
-    100: 'E:/Models/glove2vec.twitter.27B.100d.txt',
-    200: 'E:/Models/glove2vec.twitter.27B.200d.txt',
-    300: 'E:/Models/glove.6B.300d.parsed.txt',
+    25: 'D:/models/glove2vec.twitter.27B.25d.txt',
+    50: 'D:/models/glove2vec.twitter.27B.50d.txt',
+    100: 'D:/models/glove2vec.twitter.27B.100d.txt',
+    200: 'D:/models/glove2vec.twitter.27B.200d.txt',
+    300: 'D:/models/glove.6B.300d.parsed.txt',
 }
 
 glove_gen_parsings = {
-    50: 'E:/Models/Generated/GloVe2Vec_50.txt',
-    100: 'E:/Models/Generated/GloVe2Vec_100.txt',
-    200: 'E:/Models/Generated/GloVe2Vec_200.txt',
-    400: 'E:/Models/Generated/GloVe2Vec_400.txt',
+    50: 'D:/models/Generated/GloVe2Vec_50.txt',
+    100: 'D:/models/Generated/GloVe2Vec_100.txt',
+    200: 'D:/models/Generated/GloVe2Vec_200.txt',
+    400: 'D:/models/Generated/GloVe2Vec_400.txt',
 }
 
 pt_br_w2v = {
-    50: 'E:/Models/skip_s50.txt',
-    100: 'E:/Models/skip_s100.txt',
-    300: 'E:/Models/skip_s300.txt',
-    600: 'E:/Models/skip_s600.txt',
-    1000: 'E:/Models/skip_s1000.txt',
+    50: 'D:/models/word2vec_s50.txt',
+    100: 'D:/models/word2vec_s100.txt',
+    300: 'D:/models/word2vec_s300.txt',
+    600: 'D:/models/word2vec_s600.txt',
+    1000: 'D:/models/word2vec_s1000.txt',
+}
+
+pt_br_w2v_pca = {
+    (600, 300): 'D:/Models/word2vec_pca_normalize_600-300.txt',
+    (1000, 300): 'D:/Models/word2vec_pca_normalize_1000-300.txt',
 }
 
 pt_br_glove = {
-    50: 'E:/Models/glove_s50.txt',
-    100: 'E:/Models/glove_s100.txt',
-    300: 'E:/Models/glove_s300.txt',
-    600: 'E:/Models/glove_s600.txt',
-    1000: 'E:/Models/glove_s1000.txt',
+    50: 'D:/models/glove_s50.txt',
+    100: 'D:/models/glove_s100.txt',
+    300: 'D:/models/glove_s300.txt',
+    600: 'D:/models/glove_s600.txt',
+    1000: 'D:/models/glove_s1000.txt',
+}
+
+pt_br_glove_pca = {
+    (600, 300): 'D:/Models/glove_pca_normalize_600-300.txt',
+    (1000, 300): 'D:/Models/glove_pca_normalize_1000-300.txt',
 }
 
 pt_br_fasttext = {
-    50: 'E:/Models/fast_s50.txt',
-    100: 'E:/Models/fast_s100.txt',
-    300: 'E:/Models/fast_s300.txt',
-    600: 'E:/Models/fast_s600.txt',
-    1000: 'E:/Models/fast_s1000.txt',
+    50: 'D:/models/fasttext_s50.txt',
+    100: 'D:/models/fasttext_s100.txt',
+    300: 'D:/models/fasttext_s300.txt',
+    600: 'D:/models/fasttext_s600.txt',
+    1000: 'D:/models/fasttext_s1000.txt',
+}
+
+pt_br_fast_pca = {
+    (600, 300): 'D:/Models/fasttext_pca_normalize_600-300.txt',
+    (1000, 300): 'D:/Models/fasttext_pca_normalize_1000-300.txt',
 }
 
 # Cleaning process to remove any punctuation, parentheses, question marks.
@@ -106,7 +128,11 @@ remove_special_chars = re.compile("[^A-Za-z0-9 ]+")
 
 class Word2VecModel():
 
-    def __init__(self, train_dataset, test_dataset, class_qtd, base_model, set_dimensions=None):
+    def __init__(
+        self, train_dataset, test_dataset, class_qtd, base_model,
+        set_dimensions=None,
+        reduced_dimenstions=None
+    ):
         self.start_time = time.clock()
         self.classdataset = class_qtd
         self.word2vec_type = base_model
@@ -121,7 +147,7 @@ class Word2VecModel():
                     encoding='utf-8'
                 )
                 self.dimension = self.word2Vec_model.vector_size
-                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+                self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
         elif base_model == 'SkipGramGen':
@@ -131,37 +157,55 @@ class Word2VecModel():
                     encoding='utf-8'
                 )
                 self.dimension = self.word2Vec_model.vector_size
-                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+                self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
         elif base_model == 'Pt-BR_Word2Vec':
             if set_dimensions:
-                self.word2Vec_model = KeyedVectors.load_word2vec_format(
-                    pt_br_w2v[set_dimensions],
-                    encoding='utf-8'
-                )
+                if reduced_dimenstions:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_w2v_pca[(set_dimensions, reduced_dimenstions)],
+                        encoding='utf-8'
+                    )
+                else:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_w2v[set_dimensions],
+                        encoding='utf-8'
+                    )
                 self.dimension = self.word2Vec_model.vector_size
-                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+                self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
         elif base_model == 'Pt-BR_GloVe':
             if set_dimensions:
-                self.word2Vec_model = KeyedVectors.load_word2vec_format(
-                    pt_br_glove[set_dimensions],
-                    encoding='utf-8'
-                )
+                if reduced_dimenstions:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_glove_pca[(set_dimensions, reduced_dimenstions)],
+                        encoding='utf-8'
+                    )
+                else:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_glove[set_dimensions],
+                        encoding='utf-8'
+                    )
                 self.dimension = self.word2Vec_model.vector_size
-                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+                self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
         elif base_model == 'Pt-BR_FastText':
             if set_dimensions:
-                self.word2Vec_model = KeyedVectors.load_word2vec_format(
-                    pt_br_fasttext[set_dimensions],
-                    encoding='utf-8'
-                )
+                if reduced_dimenstions:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_fast_pca[(set_dimensions, reduced_dimenstions)],
+                        encoding='utf-8'
+                    )
+                else:
+                    self.word2Vec_model = KeyedVectors.load_word2vec_format(
+                        pt_br_fasttext[set_dimensions],
+                        encoding='utf-8'
+                    )
                 self.dimension = self.word2Vec_model.vector_size
-                self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+                self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
             else:
                 raise ValueError
         elif base_model == 'Wikipedia':
@@ -171,39 +215,39 @@ class Word2VecModel():
             )
             self.dimension = self.word2Vec_model.vector_size
 
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'Twitter':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_modelfile, binary=True, encoding='latin-1'
             )
             self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'Encoded_Twitter':
             _ = glove2word2vec(encoded_twitter_modelfile, encoded_twitter_modelfile_parsed)
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 encoded_twitter_modelfile_parsed, encoding='latin-1'
             )
             self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'PCA_Twitter':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 twitter_pca_modelfile, encoding='utf-8'
             )
             self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'Wikipedia':
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 wikipedia_modelfile, encoding='latin-1'
             )
             self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model == 'Twitter_200':
-            tw_model = 'E:/Models/Generated/pca_embed_200.txt'
+            tw_model = 'D:/Models/Generated/pca_embed_200.txt'
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 tw_model, encoding='utf-8'
             )
             self.dimension = self.word2Vec_model.vector_size
-            self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+            self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
         elif base_model in ['Google', 'random']:
             self.word2Vec_model = KeyedVectors.load_word2vec_format(
                 google_modelfile, binary=True
@@ -230,7 +274,7 @@ class Word2VecModel():
 
         if self.word2vec_type in vector_models:
             vectorizer = CountVectorizer(
-                min_df=1, stop_words='english',
+                min_df=1, stop_words=stop_words,
                 ngram_range=(1, 1),
                 analyzer=u'word'
             )
@@ -334,7 +378,7 @@ class GloveModel():
 
         self.train_tweets = self.parse_tweets(train_dataset)
         self.test_tweets = self.parse_tweets(test_dataset)
-        self.tweet_length = 13  # 90 percentile value of number of words in a tweet based on Twitter
+        self.tweet_length = truncate  # 90 percentile value of number of words in a tweet based on Twitter
 
     def clean(self, sentence):
         return re.sub(remove_special_chars, "", sentence.lower())
@@ -353,7 +397,7 @@ class GloveModel():
         test_labels = [int(tweet[0]) for tweet in self.test_tweets]
 
         vectorizer = CountVectorizer(
-            min_df=1, stop_words='english',
+            min_df=1, stop_words=stop_words,
             ngram_range=(1, 1),
             analyzer=u'word'
         )

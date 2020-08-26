@@ -136,3 +136,6 @@ dmypy.json
 !/Data Collection/Classified/*.csv
 !/Data Collection/Merged_classified/*.csv
 !/Data Collection/Original/*.csv
+
+# Ignore
+script.py
