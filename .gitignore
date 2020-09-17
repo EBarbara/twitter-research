@@ -104,6 +104,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+settings.ini
 
 # Spyder project settings
 .spyderproject
@@ -129,13 +130,6 @@ dmypy.json
 # PyCharm files
 .idea/
 
-# Data
+# Models (too large for Git)
 /Data Collection/*
 /Models
-/*.csv
-!/Data Collection/Classified/*.csv
-!/Data Collection/Merged_classified/*.csv
-!/Data Collection/Original/*.csv
-
-# Ignore
-script.py

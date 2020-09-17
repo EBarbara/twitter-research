@@ -25,14 +25,6 @@ with open(filename, 'r', encoding='utf-8', newline='') as f:
         stopped_words.append(len(filtered_sentence))
     print('done')
 
-# tweet_word_accumulated = {}
-# tweet_word_set = set(stopped_words)
-# accumulated = 0
-# for count in tweet_word_set:
-#     accumulated += stopped_words.count(count)
-#     tweet_word_accumulated[count] = (accumulated/43152)*100
-# print(tweet_word_accumulated)
-
 plt.hist(
     stopped_words, bins=60, range=(1, 60),
     density=True, cumulative=True

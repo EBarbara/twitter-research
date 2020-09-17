@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 data_dir = Path('dataset', 'Labelled')
-to_split = 'dataset\\Merged_classified\\revised.csv'
+to_split = 'dataset/Merged_classified/revised.csv'
 
 df = pd.read_csv(to_split)
 df_tweet_label = df[['class_est', 'id', 'tweet']]

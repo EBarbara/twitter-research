@@ -4,5 +4,6 @@ Keras==2.2.5
 matplotlib
 nltk
 numpy
+python-decouple
 sklearn
 tensorflow==1.15.2
